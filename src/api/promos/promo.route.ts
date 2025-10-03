@@ -1,0 +1,20 @@
+import { PromoController } from "./promo.controller.js";
+import { Router } from "express";
+import { validateToken, validateRole } from "../../middleware/auth.js";
+import { uploadPromoImage } from "../../middleware/uploadImage.js";
+import { validateCreatePromoBody } from "../../middleware/promo.js";
+
+const promoController = new PromoController();
+const promoRouter = Router();
+
+promoRouter.get("/", validateToken, (req, res) => promoController.findAll(req, res));
+promoRouter.get("/with-claim-count", validateToken, (req, res) => promoController.findAllWithClaimCount(req, res));
+promoRouter.get("/:id", validateToken, (req, res) => promoController.findById(req, res));
+promoRouter.get("/type/:type", validateToken, (req, res) => promoController.findByType(req, res));
+promoRouter.get("/code/:code", (req, res) => promoController.findByCode(req, res));
+promoRouter.post("/add", validateToken, uploadPromoImage.single('image'), validateCreatePromoBody, (req, res) => promoController.create(req, res));
+promoRouter.get("/status/:status", validateToken, (req, res) => promoController.findByStatus(req, res));
+promoRouter.put("/update/:id", validateToken, validateRole(["Owner"]), uploadPromoImage.single('image'), (req, res) => promoController.update(req, res));
+promoRouter.put("/delete/:id", validateToken, validateRole(["Owner"]), (req, res) => promoController.delete(req, res));
+
+export default promoRouter;
