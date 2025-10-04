@@ -6,6 +6,7 @@ const reservationController = new ReservationController();
 const routerReservation = Router();
 
 routerReservation.get("/getAll",validateToken,validateRole(["Kasir","Owner"]), (req, res) => reservationController.findAll(req, res));
+routerReservation.get("/getBy/:id", validateToken,validateRole(["Pelanggan","Kasir","Owner"]), (req, res) => reservationController.findById(req, res));
 routerReservation.get("/getByUser", validateToken, (req, res) => reservationController.findByUser(req, res));
 routerReservation.post("/add",validateToken, (req, res) => reservationController.create(req, res));
 routerReservation.get("/getByRange",validateToken,validateRole(["Kasir","Owner"]), (req, res) => reservationController.getReservationsByRange(req, res));

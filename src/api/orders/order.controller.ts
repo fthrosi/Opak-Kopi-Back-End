@@ -32,6 +32,19 @@ export class OrderController {
       res.status(500).json({ error: error.message });
     }
   }
+  async getOrderById(req: Request, res: Response) {
+    const id = parseInt(req.params.id);
+    try {
+      const order = await this.orderService.getOrderById(id);
+      res.status(200).json({
+        message: "Order fetched successfully",
+        data: order,
+      });
+    } catch (error: string | any) {
+      res.status(500).json({ error: error.message });
+    }
+
+  }
   async getDailyOrders(req: Request, res: Response) {
     try {
       const orders = await this.orderService.getDailyOrders();

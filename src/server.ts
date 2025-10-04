@@ -1,4 +1,6 @@
 import express, { Express, Request, Response } from 'express';
+import http from 'http';
+import { initializeSocket } from './socket/index.js';
 import cookieParser from 'cookie-parser';
 import authRouter from './api/auth/auth.route.js';
 import userRouter from './api/users/user.route.js';
@@ -22,7 +24,9 @@ const __dirname = path.dirname(__filename);
 
 // Inisialisasi aplikasi Express
 const app: Express = express();
-const port: number = 3000;
+const server = http.createServer(app);
+initializeSocket(server);
+const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // Middleware untuk menangani cookie
 app.use(cookieParser());
@@ -60,6 +64,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Menjalankan server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`🚀 Server berjalan di http://localhost:${port}`);
 });

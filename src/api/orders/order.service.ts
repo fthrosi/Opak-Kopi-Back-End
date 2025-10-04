@@ -8,6 +8,7 @@ import crypto from "crypto";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
+import { NotificationService } from "../../socket/notification.service.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -217,9 +218,10 @@ export class OrderService {
           await this.orderRepository.createHistoryPoint(historyPoint);
         }
       }
+      NotificationService.sendNewOrderNotification(order);
       return order;
     } catch (error: string | any) {
-      throw new Error(`Error creating order: ${error}`);
+      throw new Error(`Error creating order: ${error.message}`);
     }
   }
   async updateOrder(
@@ -272,6 +274,7 @@ export class OrderService {
           await this.orderRepository.createHistoryPoint(historyPoint);
         }
       }
+      NotificationService.sendOrderStatusUpdateNotification(update);
       return update;
     } catch (error) {
       throw new Error("Error updating order");

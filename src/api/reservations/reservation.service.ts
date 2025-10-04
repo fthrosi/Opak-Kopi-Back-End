@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
+import { NotificationService } from "../../socket/notification.service.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -95,8 +96,9 @@ export class ReservationService {
         .format("YYYY-MM-DD HH:mm:ss");
       data.created_at = nowString + "Z"; // Tambah Z sama seperti reservation_time
       data.update_at = nowString + "Z";
-
-      return await this.reservationRepository.create(data);
+      const reservation = await this.reservationRepository.create(data);
+      NotificationService.sendNewReservationNotification(reservation);
+      return reservation;
     } catch (error: string | any) {
       throw new Error(error.message);
     }
@@ -107,7 +109,9 @@ export class ReservationService {
       if (!currentReservation) {
         throw new Error("Reservation not found");
       }
-      return await this.reservationRepository.update(id, data);
+      const reservation = await this.reservationRepository.update(id, data);
+      NotificationService.sendReservationStatusUpdateNotification(reservation);
+      return reservation;
     } catch (error: string | any) {
       throw new Error(error.message);
     }

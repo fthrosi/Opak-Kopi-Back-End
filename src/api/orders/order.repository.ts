@@ -91,6 +91,7 @@ export class OrderRepository {
               select: {
                 id: true,
                 name: true,
+                image_url: true,
               },
             },
             name_menu: true,
@@ -98,6 +99,13 @@ export class OrderRepository {
             price_at_transaction: true,
             cogs_at_transaction: true,
             subtotal: true,
+          },
+        },
+        point_history: {
+          select: {
+            id: true,
+            type: true,
+            amount: true,
           },
         },
       },

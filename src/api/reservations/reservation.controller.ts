@@ -16,6 +16,18 @@ export class ReservationController {
       res.status(500).json({ error: error.message });
     }
   }
+  async findById(req: Request, res: Response) {
+    const id = parseInt(req.params.id);
+    try {
+      const reservation = await this.reservationService.findById(id);
+      if (!reservation) {
+        return res.status(404).json({ message: "Reservation not found" });
+      }
+      res.json(reservation);
+    } catch (error: string | any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
   async findByUser(req: CustomRequest, res: Response) {
     const user_id = Number(req.user?.userId);
     try {

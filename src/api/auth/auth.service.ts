@@ -127,7 +127,7 @@ export class AuthService {
       email: refreshToken.user.email,
       name: refreshToken.user.name,
       phone: refreshToken.user.phone,
-      img: refreshToken.user.img_url,
+      img: `${process.env.BASE_URL}/${refreshToken.user.img_url}`,
       poin: refreshToken.user.poin,
       role: refreshToken.user.role,
     };

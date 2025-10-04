@@ -7,6 +7,7 @@ const orderController = new OrderController();
 const orderRouter = Router();
 
 orderRouter.get("/all",validateToken,validateRole(["Kasir","Owner"]), (req,res) => orderController.getAllOrders(req, res));
+orderRouter.get("/by/:id",validateToken,validateRole(["Pelanggan","Kasir","Owner"]), (req,res) => orderController.getOrderById(req, res));
 orderRouter.get("/history",validateToken,validateRole(["Owner"]), (req,res) => orderController.getOrdersByRange(req, res));
 orderRouter.get("/user",validateToken,validateRole(["Pelanggan"]), (req,res) => orderController.getOrderByUser(req, res));
 orderRouter.get("/daily",validateToken,validateRole(["Kasir","Owner"]), (req,res) => orderController.getDailyOrders(req, res));
