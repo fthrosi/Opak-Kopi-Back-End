@@ -2,7 +2,7 @@ import { Socket, Server as SocketIOServer } from "socket.io";
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { NotificationData } from "../types/socket.js";
+import { NotificationData } from "../types/socket.types.js";
 
 dotenv.config();
 

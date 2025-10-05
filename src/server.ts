@@ -14,14 +14,18 @@ import routerReport from './api/reports/report.route.js';
 import tableRouter from './api/tables/tables.route.js';
 import reviewRouter from './api/reviews/review.route.js';
 import dashboardRouter from './api/dashboard/dashboard.route.js';
+import paymentRouter from './api/payment/payment.route.js';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 // Dapatkan __dirname versi ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+dotenv.config();
 // Inisialisasi aplikasi Express
 const app: Express = express();
 const server = http.createServer(app);
@@ -56,6 +60,7 @@ app.use('/reports', routerReport);
 app.use('/tables', tableRouter);
 app.use('/reviews', reviewRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/payment', paymentRouter);
 // Contoh endpoint sederhana
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({

@@ -1,8 +1,8 @@
 import { PromoRepository } from "./promo.repository.js";
 import { Prisma } from "@prisma/client";
 import fs from "fs/promises";
-import { PromoUpdateInputWithMenuIds } from "../../types/promo.js";
-import { PromoCreateInputWithMenuIds } from "../../types/promo.js";
+import { PromoUpdateInputWithMenuIds } from "../../types/promo.types.js";
+import { PromoCreateInputWithMenuIds } from "../../types/promo.types.js";
 import crypto from "crypto";
 import dayjs from "dayjs";
 

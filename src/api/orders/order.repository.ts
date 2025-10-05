@@ -168,6 +168,65 @@ export class OrderRepository {
       },
     });
   }
+  async getOrderByOrderCode(order_code: string) {
+    return await prisma.order.findUnique({
+      where: { order_code },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        cashier: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        table: {
+          select: {
+            id: true,
+            number: true,
+          },
+        },
+        promo: {
+          select: {
+            id: true,
+            promo_code: true,
+            name: true,
+            promo_type: true,
+            percent_value: true,
+            amount_value: true,
+          },
+        },
+        order_items: {
+          select: {
+            id: true,
+            menu: {
+              select: {
+                id: true,
+                name: true,
+                image_url: true,
+              },
+            },
+            name_menu: true,
+            quantity: true,
+            price_at_transaction: true,
+            cogs_at_transaction: true,
+            subtotal: true,
+          },
+        },
+        point_history: {
+          select: {
+            id: true,
+            type: true,
+            amount: true,
+          },
+        },
+      },
+    });
+  }
   async getDailyOrders(startDate: string, endDate: string) {
     return await prisma.order.findMany({
       where: {
@@ -307,6 +366,7 @@ export class OrderRepository {
         },
       },
       include: {
+        customer: true,
         order_items: true,
       },
     });

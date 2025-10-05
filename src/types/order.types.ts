@@ -5,6 +5,7 @@ export type Order = {
     promo_id?: number;
     point_use?: number;
     note?: string;
+    payment_method?: string;
     order_items: {
         menu_id: number;
         quantity: number;

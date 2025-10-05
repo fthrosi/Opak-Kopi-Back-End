@@ -74,7 +74,7 @@ model Table {
 
 model Order {
   id                  Int            @id @default(autoincrement())
-  order_code          String         @db.VarChar(255)
+  order_code          String         @db.VarChar(255) @unique
   customer_id         Int?
   cashier_id          Int?
   table_id            Int?
@@ -89,6 +89,8 @@ model Order {
   cancellation_reason String?        @db.VarChar(255)
   note                String?        @db.VarChar(255)
   is_rated            Boolean        @default(false)
+  payment_url         String?        @db.VarChar(255)
+  payment_token       String?        @db.VarChar(255)
   created_at          DateTime       @db.DateTime(0)
   updated_at          DateTime       @db.DateTime(0)
   order_items         OrderItem[]

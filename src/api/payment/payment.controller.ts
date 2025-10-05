@@ -1,0 +1,159 @@
+import { Request, Response } from "express";
+import { PaymentService } from "./payment.service.js";
+import type {CreatePaymentRequest,MidtransNotification } from "../../types/payment.types.js";
+
+export class PaymentController {
+  private paymentService: PaymentService;
+
+  constructor() {
+    this.paymentService = new PaymentService();
+  }
+
+  async createPayment(req: Request, res: Response): Promise<void> {
+    try {
+      const paymentData: CreatePaymentRequest = req.body;
+
+      // Validasi input wajib
+      if (!paymentData.orderId) {
+        res.status(400).json({
+          status: "error",
+          message: "orderId is required",
+        });
+        return;
+      }
+
+      if (!paymentData.amount || paymentData.amount <= 0) {
+        res.status(400).json({
+          status: "error",
+          message: "amount must be greater than 0",
+        });
+        return;
+      }
+
+      if (!paymentData.customerDetails) {
+        res.status(400).json({
+          status: "error",
+          message: "customerDetails is required",
+        });
+        return;
+      }
+
+      if (!paymentData.items || paymentData.items.length === 0) {
+        res.status(400).json({
+          status: "error",
+          message: "items cannot be empty",
+        });
+        return;
+      }
+
+      // Validasi total amount sesuai dengan items
+      const totalAmount = paymentData.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      if (totalAmount !== paymentData.amount) {
+        res.status(400).json({
+          status: "error",
+          message: `Amount mismatch. Expected: ${totalAmount}, Got: ${paymentData.amount}`,
+        });
+        return;
+      }
+
+      // Panggil service untuk buat payment
+      const result = await this.paymentService.createPayment(paymentData);
+
+      res.status(200).json({
+        status: "success",
+        message: "Payment created successfully",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Create payment error:", error);
+      res.status(500).json({
+        status: "error",
+        message: error.message || "Error creating payment",
+      });
+    }
+  }
+
+  async handleCallback(req: Request, res: Response): Promise<void> {
+    try {
+      const notification: MidtransNotification = req.body;
+
+      console.log("=== Midtrans Callback Received ===");
+      console.log("Order ID:", notification.order_id);
+      console.log("Status:", notification.transaction_status);
+      console.log("Payment Type:", notification.payment_type);
+      console.log("==================================");
+
+      // Validasi notification dari Midtrans
+      if (!notification.order_id || !notification.transaction_status) {
+        res.status(400).json({
+          status: "error",
+          message: "Invalid notification data",
+        });
+        return;
+      }
+
+      // Process callback
+      const result = await this.paymentService.handleCallback(notification);
+
+      // PENTING: Midtrans expect 200 OK response
+      res.status(200).json({
+        status: "success",
+        message: "Notification processed successfully",
+        data: result,
+      });
+    } catch (error: any) {
+      console.error("Callback error:", error);
+
+      // PENTING: Tetap return 200 OK
+      // Jika return error, Midtrans akan retry berkali-kali
+      // Log error untuk investigation nanti
+      res.status(200).json({
+        status: "error",
+        message: error.message || "Error processing payment callback",
+      });
+    }
+  }
+  async checkStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { orderId } = req.params;
+      
+      if (!orderId) {
+        res.status(400).json({
+          status: "error",
+          message: "orderId parameter is required"
+        });
+        return;
+      }
+
+      console.log('Checking status for order:', orderId);
+
+      const status = await this.paymentService.checkTransactionStatus(orderId);
+      
+      res.status(200).json({
+        status: "success",
+        data: status
+      });
+    } catch (error: any) {
+      console.error('Check status error:', error);
+      
+      // Handle specific Midtrans errors
+      if (error.message.includes('404')) {
+        res.status(404).json({
+          status: "error",
+          message: "Transaction not found",
+        });
+        return;
+      }
+
+      res.status(500).json({
+        status: "error",
+        message: error.message || "Error checking transaction status",
+      });
+    }
+  }
+  
+}

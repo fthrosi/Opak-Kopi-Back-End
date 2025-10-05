@@ -8,6 +8,7 @@ import crypto from "crypto";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
+import { PaymentService } from "../payment/payment.service.js";
 import { NotificationService } from "../../socket/notification.service.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -17,11 +18,13 @@ export class OrderService {
   private menuRepository: MenuRepository;
   private promoRepository: PromoRepository;
   private userRepository: UserRepository;
+  private paymentService: PaymentService;
 
   constructor() {
     this.orderRepository = new OrderRepository();
     this.menuRepository = new MenuRepository();
     this.promoRepository = new PromoRepository();
+    this.paymentService = new PaymentService();
     this.userRepository = new UserRepository();
   }
   async getAllOrders() {
@@ -54,6 +57,13 @@ export class OrderService {
       throw new Error("Error fetching orders by user");
     }
   }
+  async getOrderByOrderCode(order_code: string) {
+    try {
+      return await this.orderRepository.getOrderByOrderCode(order_code);
+    } catch (error) {
+      throw new Error("Error fetching order by order code");
+    }
+  }
   async getDailyOrders() {
     const today = dayjs().tz("Asia/Jakarta");
     const startOfDay = today.startOf("day").format("YYYY-MM-DD HH:mm:ss") + "Z";
@@ -76,8 +86,10 @@ export class OrderService {
           .startOf("day")
           .format("YYYY-MM-DD 00:00:00") + "Z";
       end =
-        dayjs(endDate).tz("Asia/Jakarta").endOf("day").format("YYYY-MM-DD 23:59:59") +
-        "Z";
+        dayjs(endDate)
+          .tz("Asia/Jakarta")
+          .endOf("day")
+          .format("YYYY-MM-DD 23:59:59") + "Z";
     } else {
       const now = dayjs().tz("Asia/Jakarta");
       start = now.startOf("month").format("YYYY-MM-DD 00:00:00") + "Z";
@@ -96,8 +108,19 @@ export class OrderService {
     let totalPrice = 0;
     let status = "";
     let user = null;
-    const code = crypto.randomBytes(4).toString("hex");
-    const order_code = `ORD-${code.toUpperCase()}`;
+    let isCode = true;
+    let order_code = "";
+    while (isCode) {
+      const code = crypto.randomBytes(4).toString("hex");
+      order_code = `ORD-${code.toUpperCase()}`;
+
+      const code_check = await this.orderRepository.getOrderByOrderCode(
+        order_code
+      );
+      if (!code_check) {
+        isCode = false;
+      }
+    }
 
     if (userId) {
       user = await this.userRepository.findById(Number(userId));
@@ -116,9 +139,9 @@ export class OrderService {
     }
     status = user
       ? user.role.name === "Pelanggan"
-        ? "Dikirim"
+        ? "Menunggu Pembayaran"
         : "Diproses"
-      : "Dikirim";
+      : "Menunggu Pembayaran";
 
     for (const item of orderData.order_items) {
       const menu = await this.menuRepository.findById(item.menu_id);
@@ -218,8 +241,44 @@ export class OrderService {
           await this.orderRepository.createHistoryPoint(historyPoint);
         }
       }
-      NotificationService.sendNewOrderNotification(order);
-      return order;
+      if (data.payment_method !== "Tunai" && user?.role.name === "Pelanggan") {
+        const paymentData = {
+          orderId: order.order_code,
+          amount: order.total_price,
+          customerDetails: {
+            first_name: order.customer_name || "Guest",
+            email: order.customer?.email || "guest@example.com",
+            phone: order.customer?.phone || "",
+          },
+          items: order.order_items.map((item: any) => ({
+            id: String(item.menu_id),
+            name: item.name_menu,
+            price: item.price_at_transaction,
+            quantity: item.quantity,
+          })),
+        };
+
+        const payment = await this.paymentService.createPayment(paymentData);
+
+        // Update order dengan payment URL
+        await this.orderRepository.updateOrder(order.id, {
+          payment_url: payment.redirect_url,
+          payment_token: payment.token,
+          status: "Menunggu Pembayaran",
+        });
+
+        // // Tambahkan payment info ke order
+        return {
+          ...order,
+          payment_url: payment.redirect_url,
+          payment_token: payment.token,
+        };
+      } else {
+        await this.orderRepository.updateOrder(order.id, {
+          status: "Diproses",
+        });
+        return order;
+      }
     } catch (error: string | any) {
       throw new Error(`Error creating order: ${error.message}`);
     }

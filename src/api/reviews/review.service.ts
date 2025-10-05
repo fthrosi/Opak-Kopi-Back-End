@@ -1,7 +1,7 @@
 import { ReviewRepository } from "./review.repository.js";
 import { OrderService } from "../orders/order.service.js";
 import { Prisma } from "@prisma/client";
-import type { rating } from "../../types/rating.js";
+import type { rating } from "../../types/rating.types.js";
 
 export class ReviewService {
   private reviewRepository: ReviewRepository;
