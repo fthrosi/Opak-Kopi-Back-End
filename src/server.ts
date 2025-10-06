@@ -15,6 +15,7 @@ import tableRouter from './api/tables/tables.route.js';
 import reviewRouter from './api/reviews/review.route.js';
 import dashboardRouter from './api/dashboard/dashboard.route.js';
 import paymentRouter from './api/payment/payment.route.js';
+import "./lib/cron/checkPaymentStatus.js"
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';

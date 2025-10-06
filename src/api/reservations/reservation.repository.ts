@@ -23,6 +23,9 @@ export class ReservationRepository {
         update_at: true,
         checkin_code: true,
       },
+      orderBy: {
+        created_at: "desc",
+      },
     });
   }
   async findById(id: number) {
@@ -66,6 +69,9 @@ export class ReservationRepository {
         created_at: true,
         update_at: true,
         checkin_code: true,
+      },
+      orderBy: {
+        created_at: "desc",
       },
     });
   }

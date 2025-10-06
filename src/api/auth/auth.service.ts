@@ -75,7 +75,7 @@ export class AuthService {
       status: "Aktif",
     };
     const user = await this.authRepository.createUser(newUserData);
-    const verificationLink = `http://localhost:3000/auth/verify-email?token=${verificationToken}`;
+    const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,

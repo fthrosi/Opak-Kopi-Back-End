@@ -192,6 +192,7 @@ export class OrderService {
       note: data.note ?? "",
       created_at: createdAt,
       updated_at: updatedAt,
+      payment_method: data.payment_method || "",
     };
 
     user
@@ -241,7 +242,7 @@ export class OrderService {
           await this.orderRepository.createHistoryPoint(historyPoint);
         }
       }
-      if (data.payment_method !== "Tunai" && user?.role.name === "Pelanggan") {
+      if (data.payment_method !== "Tunai" && user?.role.name !== "Kasir") {
         const paymentData = {
           orderId: order.order_code,
           amount: order.total_price,
