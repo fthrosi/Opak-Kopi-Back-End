@@ -35,13 +35,11 @@ export class AuthService {
       poin: user.poin,
       role: user.role,
     };
-    // Generate JWT token
     const secretKey = process.env.JWT_SECRET as string;
     const accessToken = jwt.sign(payload, secretKey, { expiresIn: "5m" });
-    // Generate refresh token
     const refreshToken = crypto.randomBytes(64).toString("hex");
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30); // Set expiry to 30 days
+    expiryDate.setDate(expiryDate.getDate() + 30);
 
     const agent = req.headers["user-agent"] || "unknown";
     const ip = req.ip || "unknown";
@@ -149,24 +147,16 @@ export class AuthService {
     return updatedUser;
   }
   async requestPasswordReset(email: string) {
-    // Cek apakah email terdaftar
     const user = await this.authRepository.findByEmail(email);
     if (!user) {
       throw new Error("Email tidak terdaftar");
     }
-
-    // Generate OTP 6 digit
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Set expiry time (15 menit)
     const expiryTime = new Date();
     expiryTime.setMinutes(expiryTime.getMinutes() + 15);
 
     const id = Number(user.id);
-    // Simpan OTP ke database
     await this.authRepository.saveResetToken(id, otp, expiryTime);
-
-    // Kirim email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -188,16 +178,11 @@ export class AuthService {
     return { message: "Kode OTP telah dikirim ke email Anda" };
   }
   async verifyOTP(email: string, otp: string) {
-    // Verifikasi OTP saja tanpa reset password
     const user = await this.authRepository.verifyResetToken(email, otp);
     if (!user) {
       throw new Error("OTP tidak valid atau sudah expired");
     }
-
-    // Generate token sementara untuk halaman reset password
     const resetToken = crypto.randomBytes(32).toString("hex");
-
-    // Simpan token sementara dengan expiry baru (10 menit)
     const newExpiryTime = new Date();
     newExpiryTime.setMinutes(newExpiryTime.getMinutes() + 10);
 
