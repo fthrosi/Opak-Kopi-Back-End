@@ -17,11 +17,12 @@ export class MenuCategoryService {
   }
 
   async findAll() {
-    const kategori = await this.menuCategoryRepository.findAll();
-    if (!kategori || kategori.length === 0) {
-      throw new Error("No menu categories found");
+    try {
+      const kategori = await this.menuCategoryRepository.findAll();
+      return kategori;
+    } catch (error) {
+      throw new Error("Failed to retrieve menu categories");
     }
-    return kategori;
   }
 
   async findById(id: number) {

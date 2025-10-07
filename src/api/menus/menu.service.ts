@@ -14,14 +14,15 @@ export class MenuService {
     this.menuRepository = new MenuRepository();
   }
   async findAll() {
-    const menus = await this.menuRepository.findAll();
-    menus.forEach((menu) => {
-      menu.image_url = `${process.env.BASE_URL}/${menu.image_url}`;
-    });
-    if (!menus || menus.length === 0) {
-      throw new Error("No menus found");
+    try {
+      const menus = await this.menuRepository.findAll();
+      menus.forEach((menu) => {
+        menu.image_url = `${process.env.BASE_URL}/${menu.image_url}`;
+      });
+      return menus;
+    } catch (error) {
+      throw new Error("Failed to retrieve menus");
     }
-    return menus;
   }
   async findById(id: number) {
     const menu = await this.menuRepository.findById(id);
