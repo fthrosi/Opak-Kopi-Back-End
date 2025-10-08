@@ -243,20 +243,41 @@ export class OrderService {
         }
       }
       if (data.payment_method !== "Tunai" && user?.role.name !== "Kasir") {
+        const paymentItems = order.order_items.map((item: any) => ({
+          id: String(item.menu_id),
+          name: item.name_menu,
+          price: item.price_at_transaction,
+          quantity: item.quantity,
+        }));
+
+        // 2. Tambahkan diskon sebagai item negatif jika ada
+        if (diskon > 0) {
+          paymentItems.push({
+            id: "PROMO_DISCOUNT",
+            name: promo ? `Diskon ${promo.name}` : "Diskon Promo",
+            price: -Math.round(diskon),
+            quantity: 1,
+          });
+        }
+
+        // 3. Tambahkan potongan poin sebagai item negatif jika ada
+        if (point_value_used > 0) {
+          paymentItems.push({
+            id: "POINTS_REDEMPTION",
+            name: "Potongan Poin",
+            price: -Math.round(point_value_used),
+            quantity: 1,
+          });
+        }
         const paymentData = {
           orderId: order.order_code,
-          amount: order.total_price,
+          amount: Math.round(order.total_price),
           customerDetails: {
             first_name: order.customer_name || "Guest",
             email: order.customer?.email || "guest@example.com",
             phone: order.customer?.phone || "",
           },
-          items: order.order_items.map((item: any) => ({
-            id: String(item.menu_id),
-            name: item.name_menu,
-            price: item.price_at_transaction,
-            quantity: item.quantity,
-          })),
+          items: paymentItems,
         };
 
         const payment = await this.paymentService.createPayment(paymentData);

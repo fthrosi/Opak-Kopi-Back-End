@@ -12,16 +12,13 @@ export class DashboardService {
     const currentYear = dayjs().year();
 
     try {
-      // Bagian 1: Summary
       const summary = await this.dashboardRepository.getTotalCounts();
 
-      // Bagian 2: Monthly Revenue
       const monthlyData = await this.dashboardRepository.getMonthlyRevenue(
         currentYear
       );
       const monthlyRevenue = this.processMonthlyRevenue(monthlyData);
 
-      // Bagian 3: Top menus by category
       const topMenus = await this.getTopMenusByCategory();
 
       return {
@@ -50,15 +47,14 @@ export class DashboardService {
       "Desember",
     ];
 
-    // Initialize dengan 0 untuk setiap bulan
     const monthlyRevenue = months.map((month, index) => ({
       month,
       revenue: 0,
     }));
 
-    // Hitung revenue per bulan
+
     data.forEach((order) => {
-      const monthIndex = dayjs(order.created_at).month(); // 0-11
+      const monthIndex = dayjs(order.created_at).month();
       monthlyRevenue[monthIndex].revenue += order.total_price || 0;
     });
 
@@ -72,7 +68,7 @@ export class DashboardService {
       .filter((id): id is number => id !== null && id !== undefined);
     const menuDetails = await this.dashboardRepository.getMenuDetails(menuIds);
 
-    // Gabungkan data quantity dengan detail menu
+
     const menusWithQuantity = topMenusData
       .filter((item) => item.menu_id !== null)
       .map((item) => {
@@ -85,7 +81,7 @@ export class DashboardService {
       })
       .filter((item) => item.id);
 
-    // Group by category dan ambil top 2 per kategori
+
     const groupedByCategory: Record<string, any[]> = {};
 
     menusWithQuantity.forEach((menu) => {
@@ -96,7 +92,7 @@ export class DashboardService {
       groupedByCategory[categoryName].push(menu);
     });
 
-    // Ambil top 2 per kategori
+
     const result = Object.keys(groupedByCategory).map((categoryName) => ({
       categoryName,
       categoryId: groupedByCategory[categoryName][0]?.category?.id || null,

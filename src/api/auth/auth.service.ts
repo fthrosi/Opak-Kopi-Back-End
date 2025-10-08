@@ -198,18 +198,12 @@ export class AuthService {
     };
   }
   async resetPassword(resetToken: string, newPassword: string) {
-  // Cari user dengan reset token
-  const user = await this.authRepository.findByResetToken(resetToken);
-  if (!user) {
-    throw new Error("Token reset tidak valid atau sudah expired");
+    const user = await this.authRepository.findByResetToken(resetToken);
+    if (!user) {
+      throw new Error("Token reset tidak valid atau sudah expired");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.authRepository.resetPassword(user.id, hashedPassword);
+    return { message: "Password berhasil diubah" };
   }
-  
-  // Hash password baru
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-  // Update password dan hapus token
-  await this.authRepository.resetPassword(user.id, hashedPassword);
-  
-  return { message: "Password berhasil diubah" };
-}
 }

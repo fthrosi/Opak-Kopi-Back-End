@@ -42,14 +42,7 @@ export class UserController {
     }
   }
 
-  async createUser(req: Request, res: Response) {
-    try {
-      const user = await this.userService.createUser(req.body);
-      res.status(201).json(user);
-    } catch (error: string | any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
+  
 
   async updateUser(req: CustomRequest, res: Response) {
     const userId = Number(req.user?.userId);
@@ -151,6 +144,14 @@ export class UserController {
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  }
+  async createUser(req: Request, res: Response) {
+    try {
+      const user = await this.userService.createUser(req.body);
+      res.status(201).json(user);
+    } catch (error: string | any) {
+      res.status(500).json({ error: error.message });
     }
   }
   async updateStatus(req: Request, res: Response) {

@@ -55,7 +55,6 @@ export class PromoController {
   }
   async findByCode(req: Request, res: Response) {
     const code = req.params.code;
-    // Ambil menuIds dari query parameter
     const menuIds = req.query.menuIds
       ? (req.query.menuIds as string).split(",").map((id) => parseInt(id))
       : undefined;

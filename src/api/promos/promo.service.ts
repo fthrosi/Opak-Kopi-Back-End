@@ -67,13 +67,10 @@ export class PromoService {
           const promoMenuIds = menus.map((menu) => menu.id);
 
           if (menuIds && menuIds.length > 0) {
-            const isValidMenus = menuIds.every((menuId) =>
-              promoMenuIds.includes(menuId)
+            const isValidMenus = promoMenuIds.every((menuId) =>
+              menuIds.includes(menuId)
             );
             if (!isValidMenus) {
-              const invalidMenus = menuIds.filter(
-                (menuId) => !promoMenuIds.includes(menuId)
-              );
               throw {
                 status: 400,
                 message: `Promo hanya dapat digunakan jika ada menu: ${menus
@@ -81,13 +78,6 @@ export class PromoService {
                   .join(" , ")}`,
               };
             }
-          } else {
-            throw {
-              status: 400,
-              message: `Promo hanya berlaku untuk menu: ${menus
-                .map((m) => m.name)
-                .join(", ")}`,
-            };
           }
 
           (promo as any).menus = menus;

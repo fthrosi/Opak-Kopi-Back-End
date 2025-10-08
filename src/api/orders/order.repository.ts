@@ -396,6 +396,7 @@ export class OrderRepository {
   async getHistoryPointByUser(id_user: number) {
     return await prisma.pointHistory.findMany({
       where: { user_id: id_user },
+      orderBy: { created_at: "desc" },
     });
   }
 

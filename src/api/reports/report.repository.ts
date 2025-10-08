@@ -52,6 +52,7 @@ export class ReportRepository {
     const report = await prisma.order.groupBy({
       by: ["promo_id"],
       where: {
+        status: "Selesai",
         promo_id: {
           not: null,
         },

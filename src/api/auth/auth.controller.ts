@@ -15,16 +15,18 @@ export class AuthController {
       // Set the access token in a cookie
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+        secure: true, // Use secure cookies in production
         maxAge: 5 * 60 * 1000, // 5 minutes
         path: "/",
+        sameSite: "none",
       });
       // Set the refresh token in a cookie
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+        secure: true, // Use secure cookies in production
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         path: "/",
+        sameSite: "none",
       });
       res.status(200).json({
         message: "Login successful",
