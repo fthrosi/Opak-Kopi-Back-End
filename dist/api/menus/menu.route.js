@@ -1,0 +1,13 @@
+import { MenuController } from "./menu.controller.js";
+import { Router } from "express";
+import { validateToken, validateRole } from "../../middleware/auth.js";
+import { uploadProductImage } from "../../middleware/uploadImage.js";
+const menuController = new MenuController();
+const menuRouter = Router();
+menuRouter.get("/", (req, res) => menuController.findAll(req, res));
+menuRouter.get("/:id", validateToken, (req, res) => menuController.findById(req, res));
+menuRouter.post("/add", validateToken, validateRole(["Owner"]), uploadProductImage.single('image'), (req, res) => menuController.create(req, res));
+menuRouter.get("/category/:categoryId", validateToken, (req, res) => menuController.findByCategory(req, res));
+menuRouter.put("/update/:id", validateToken, validateRole(["Owner", "Kasir"]), uploadProductImage.single('image'), (req, res) => menuController.update(req, res));
+menuRouter.put("/delete/:id", validateToken, validateRole(["Owner"]), (req, res) => menuController.delete(req, res));
+export default menuRouter;
