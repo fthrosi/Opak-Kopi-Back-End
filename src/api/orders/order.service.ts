@@ -279,7 +279,6 @@ export class OrderService {
           },
           items: paymentItems,
         };
-
         const payment = await this.paymentService.createPayment(paymentData);
 
         // Update order dengan payment URL

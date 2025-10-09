@@ -20,7 +20,7 @@ export class AuthService {
     if (user.status !== "Aktif") {
       throw {
         status: 403,
-        message: "Akun tidak aktif. Silakan hubungi admin.",
+        message: "Akun Diblokir. Silakan hubungi admin.",
       };
     }
     if (!bcrypt.compareSync(password, user.password)) {

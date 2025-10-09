@@ -16,6 +16,7 @@ import reviewRouter from './api/reviews/review.route.js';
 import dashboardRouter from './api/dashboard/dashboard.route.js';
 import paymentRouter from './api/payment/payment.route.js';
 import "./lib/cron/checkPaymentStatus.js"
+import "./lib/cron/checkReservationStatus.js"
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';

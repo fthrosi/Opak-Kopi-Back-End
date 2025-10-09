@@ -153,7 +153,7 @@ export class ReportService {
       reservasiRecord[date].jumlahDibatalkan +=
         item.status === "Dibatalkan" ? 1 : 0;
       reservasiRecord[date].jumlahDitolak += item.status === "Ditolak" ? 1 : 0;
-      reservasiRecord[date].jumlahHadir += item.status === "Hadir" ? 1 : 0;
+      reservasiRecord[date].jumlahHadir += item.status === "Selesai" ? 1 : 0;
       reservasiRecord[date].jumlahTidakHadir +=
         item.status === "Tidak Hadir" ? 1 : 0;
     });

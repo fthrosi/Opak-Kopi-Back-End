@@ -5,10 +5,8 @@ import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-// Set timezone ke Asia/Jakarta
 dayjs.tz.setDefault("Asia/Jakarta");
 
-// Jalankan setiap 2 menit
 cron.schedule("*/2 * * * *", async () => {
   try {
     const pendingOrders = await prisma.order.findMany({
