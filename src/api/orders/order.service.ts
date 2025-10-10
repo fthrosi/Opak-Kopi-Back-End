@@ -250,7 +250,6 @@ export class OrderService {
           quantity: item.quantity,
         }));
 
-        // 2. Tambahkan diskon sebagai item negatif jika ada
         if (diskon > 0) {
           paymentItems.push({
             id: "PROMO_DISCOUNT",
@@ -260,7 +259,6 @@ export class OrderService {
           });
         }
 
-        // 3. Tambahkan potongan poin sebagai item negatif jika ada
         if (point_value_used > 0) {
           paymentItems.push({
             id: "POINTS_REDEMPTION",
@@ -281,14 +279,12 @@ export class OrderService {
         };
         const payment = await this.paymentService.createPayment(paymentData);
 
-        // Update order dengan payment URL
         await this.orderRepository.updateOrder(order.id, {
           payment_url: payment.redirect_url,
           payment_token: payment.token,
           status: "Menunggu Pembayaran",
         });
 
-        // // Tambahkan payment info ke order
         return {
           ...order,
           payment_url: payment.redirect_url,

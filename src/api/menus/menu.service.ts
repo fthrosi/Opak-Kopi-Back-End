@@ -13,17 +13,6 @@ export class MenuService {
   constructor() {
     this.menuRepository = new MenuRepository();
   }
-  async findAll() {
-    try {
-      const menus = await this.menuRepository.findAll();
-      menus.forEach((menu) => {
-        menu.image_url = `${process.env.BASE_URL}/${menu.image_url}`;
-      });
-      return menus;
-    } catch (error) {
-      throw new Error("Failed to retrieve menus");
-    }
-  }
   async findById(id: number) {
     const menu = await this.menuRepository.findById(id);
     if (!menu) {
@@ -34,6 +23,17 @@ export class MenuService {
   async findByCategory(categoryId: number) {
     const menus = await this.menuRepository.findByCategory(categoryId);
     return menus;
+  }
+  async findAll() {
+    try {
+      const menus = await this.menuRepository.findAll();
+      menus.forEach((menu) => {
+        menu.image_url = `${process.env.BASE_URL}/${menu.image_url}`;
+      });
+      return menus;
+    } catch (error) {
+      throw new Error("Failed to retrieve menus");
+    }
   }
   async create(data: Prisma.MenuCreateInput) {
     const createdMenu = await this.menuRepository.create(data);

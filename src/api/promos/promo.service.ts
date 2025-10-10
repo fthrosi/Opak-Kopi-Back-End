@@ -11,13 +11,7 @@ export class PromoService {
   constructor() {
     this.promoRepository = new PromoRepository();
   }
-  async findAll() {
-    const promos = await this.promoRepository.findAll();
-    if (!promos || promos.length === 0) {
-      throw new Error("No promos found");
-    }
-    return promos;
-  }
+  
   async findAllWithClaimCount() {
     try {
       const promos = await this.promoRepository.findAllWithClaimCount();
@@ -92,6 +86,13 @@ export class PromoService {
     } catch (error: string | any) {
       throw error;
     }
+  }
+  async findAll() {
+    const promos = await this.promoRepository.findAll();
+    if (!promos || promos.length === 0) {
+      throw new Error("No promos found");
+    }
+    return promos;
   }
   async create(data: PromoCreateInputWithMenuIds) {
     try {

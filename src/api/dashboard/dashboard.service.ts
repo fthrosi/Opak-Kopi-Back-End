@@ -52,7 +52,6 @@ export class DashboardService {
       revenue: 0,
     }));
 
-
     data.forEach((order) => {
       const monthIndex = dayjs(order.created_at).month();
       monthlyRevenue[monthIndex].revenue += order.total_price || 0;
@@ -68,7 +67,6 @@ export class DashboardService {
       .filter((id): id is number => id !== null && id !== undefined);
     const menuDetails = await this.dashboardRepository.getMenuDetails(menuIds);
 
-
     const menusWithQuantity = topMenusData
       .filter((item) => item.menu_id !== null)
       .map((item) => {
@@ -81,7 +79,6 @@ export class DashboardService {
       })
       .filter((item) => item.id);
 
-
     const groupedByCategory: Record<string, any[]> = {};
 
     menusWithQuantity.forEach((menu) => {
@@ -91,7 +88,6 @@ export class DashboardService {
       }
       groupedByCategory[categoryName].push(menu);
     });
-
 
     const result = Object.keys(groupedByCategory).map((categoryName) => ({
       categoryName,
@@ -106,9 +102,40 @@ export class DashboardService {
             ? `${process.env.BASE_URL}/${menu.image_url}`
             : null,
           totalSold: menu.totalSold,
-            totalRevenue: menu.totalRevenue,
+          totalRevenue: menu.totalRevenue,
         })),
     }));
     return result;
+  }
+  async getTopSellingMenus(limit: number) {
+    try {
+      const topMenusData = await this.dashboardRepository.getTopSellingMenus(
+        limit
+      );
+      let menuIds = topMenusData
+        .map((item) => item.menu_id)
+        .filter((id): id is number => id !== null && id !== undefined);
+
+      if (menuIds.length === 0) {
+        menuIds = [1, 2, 3];
+      }
+      const menuDetails = await this.dashboardRepository.getMenuDetails(
+        menuIds
+      );
+
+      return topMenusData.map((item) => {
+        const menu = menuDetails.find((m) => m.id === item.menu_id);
+        return {
+          ...menu,
+          image_url: menu?.image_url
+            ? `${process.env.BASE_URL}/${menu.image_url}`
+            : null,
+          totalSold: item._sum.quantity || 0,
+          totalRevenue: item._sum.subtotal || 0,
+        };
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -84,4 +84,20 @@ export class DashboardRepository {
       },
     });
   }
+
+  async getTopSellingMenus(limit: number) {
+    return await prisma.orderItem.groupBy({
+      by: ["menu_id"],
+      _sum: {
+        quantity: true,
+        subtotal: true,
+      },
+      orderBy: {
+        _sum: {
+          quantity: "desc",
+        },
+      },
+      take: limit,
+    });
+  }
 }

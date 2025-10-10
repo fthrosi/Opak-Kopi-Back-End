@@ -60,6 +60,37 @@ export class ReservationService {
     }
     return await this.reservationRepository.getReservasiByRange(start, end);
   }
+  
+  async create(data: Prisma.reservationsCreateInput) {
+    try {
+      if (data.reservation_time) {
+        data.reservation_time = data.reservation_time + "Z";
+      }
+      const nowString = dayjs()
+        .tz("Asia/Jakarta")
+        .format("YYYY-MM-DD HH:mm:ss");
+      data.created_at = nowString + "Z";
+      data.update_at = nowString + "Z";
+      const reservation = await this.reservationRepository.create(data);
+      NotificationService.sendNewReservationNotification(reservation);
+      return reservation;
+    } catch (error: string | any) {
+      throw new Error(error.message);
+    }
+  }
+  async update(id: number, data: Prisma.reservationsUpdateInput) {
+    try {
+      const currentReservation = await this.reservationRepository.findById(id);
+      if (!currentReservation) {
+        throw new Error("Reservation not found");
+      }
+      const reservation = await this.reservationRepository.update(id, data);
+      NotificationService.sendReservationStatusUpdateNotification(reservation);
+      return reservation;
+    } catch (error: string | any) {
+      throw new Error(error.message);
+    }
+  }
   async checkin(reservationId: number, checkinCode: string) {
     try {
       const reservation = await this.reservationRepository.findById(
@@ -80,38 +111,6 @@ export class ReservationService {
         update_at: update_at,
       };
       return await this.reservationRepository.update(reservationId, data);
-    } catch (error: string | any) {
-      throw new Error(error.message);
-    }
-  }
-  async create(data: Prisma.reservationsCreateInput) {
-    try {
-      if (data.reservation_time) {
-        data.reservation_time = data.reservation_time + "Z";
-      }
-
-      // Set created_at dan update_at manual dengan approach yang sama seperti reservation_time
-      const nowString = dayjs()
-        .tz("Asia/Jakarta")
-        .format("YYYY-MM-DD HH:mm:ss");
-      data.created_at = nowString + "Z"; // Tambah Z sama seperti reservation_time
-      data.update_at = nowString + "Z";
-      const reservation = await this.reservationRepository.create(data);
-      NotificationService.sendNewReservationNotification(reservation);
-      return reservation;
-    } catch (error: string | any) {
-      throw new Error(error.message);
-    }
-  }
-  async update(id: number, data: Prisma.reservationsUpdateInput) {
-    try {
-      const currentReservation = await this.reservationRepository.findById(id);
-      if (!currentReservation) {
-        throw new Error("Reservation not found");
-      }
-      const reservation = await this.reservationRepository.update(id, data);
-      NotificationService.sendReservationStatusUpdateNotification(reservation);
-      return reservation;
     } catch (error: string | any) {
       throw new Error(error.message);
     }
