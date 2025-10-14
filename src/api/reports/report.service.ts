@@ -187,6 +187,7 @@ export class ReportService {
     endDate?: string
   ): Promise<menuReportResponse> {
     let start, end;
+
     if (
       startDate &&
       endDate &&
@@ -208,9 +209,27 @@ export class ReportService {
       start = now.startOf("month").format("YYYY-MM-DD 00:00:00") + "Z";
       end = now.endOf("month").format("YYYY-MM-DD 23:59:59") + "Z";
     }
-    const report = await this.reportRepository.getMenuReport(start, end);
+
+    const { allMenus, report } = await this.reportRepository.getMenuReport(
+      start,
+      end
+    );
+
     const menuReportRecord: Record<string, menuReportRow> = {};
 
+    // Inisialisasi semua menu dengan nilai 0
+    allMenus.forEach((menu) => {
+      menuReportRecord[menu.name] = {
+        namaMenu: menu.name,
+        kategori: menu.category?.name || "",
+        jumlahTerjual: 0,
+        pendapatanKotor: 0,
+        hpp: 0,
+        profitKotor: 0,
+      };
+    });
+
+    // Update dengan data order yang ada
     report.forEach((item) => {
       item.order_items.forEach((orderItem) => {
         const menuName = orderItem.name_menu;
@@ -244,7 +263,11 @@ export class ReportService {
       ProfitPalingBesar: 0,
     };
 
-    const rows: menuReportRow[] = Object.values(menuReportRecord);
+    // Urutkan berdasarkan jumlah terjual dari terbanyak
+    const rows: menuReportRow[] = Object.values(menuReportRecord).sort(
+      (a, b) => b.jumlahTerjual - a.jumlahTerjual
+    );
+
     rows.forEach((row) => {
       if (row.jumlahTerjual > summary.terjualTerbanyak) {
         summary.terjualTerbanyak = row.jumlahTerjual;
@@ -261,6 +284,7 @@ export class ReportService {
       rows,
     };
   }
+
   async getPromoReport(startDate?: string, endDate?: string) {
     let start, end;
     if (
@@ -305,7 +329,9 @@ export class ReportService {
       return {
         id: promo.id,
         namaPromo: promo.name || "Promo tidak diketahui",
-        periode: `${promo.start_date || "Tanggal tidak diketahui"} - ${promo.end_date || "Tanggal tidak diketahui"}`,
+        periode: `${promo.start_date || "Tanggal tidak diketahui"} - ${
+          promo.end_date || "Tanggal tidak diketahui"
+        }`,
         jumlahDigunakan: usage?.count || 0,
         totalDiskon: usage?.totalDiskon || 0,
       };

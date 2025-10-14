@@ -1,7 +1,7 @@
 import prisma from "../../config/db.js";
 
 export class ReportRepository {
-  async getSalesReport(start: string,end: string ) {
+  async getSalesReport(start: string, end: string) {
     const report = await prisma.order.findMany({
       where: {
         created_at: {
@@ -18,6 +18,21 @@ export class ReportRepository {
   }
 
   async getMenuReport(start: string, end: string) {
+    // Ambil semua menu terlebih dahulu
+    const allMenus = await prisma.menu.findMany({
+      select: {
+        id: true,
+        name: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Ambil order yang sudah selesai dalam range tanggal
     const report = await prisma.order.findMany({
       where: {
         created_at: {
@@ -45,7 +60,8 @@ export class ReportRepository {
         },
       },
     });
-    return report;
+
+    return { allMenus, report };
   }
 
   async getPromoReport(start: string, end: string) {
@@ -65,9 +81,9 @@ export class ReportRepository {
       _count: {
         promo_id: true,
       },
-        _sum: {
-            promo_value: true,
-        },
+      _sum: {
+        promo_value: true,
+      },
     });
     return report;
   }
