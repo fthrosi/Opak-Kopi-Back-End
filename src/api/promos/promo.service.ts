@@ -89,6 +89,9 @@ export class PromoService {
   }
   async findAll() {
     const promos = await this.promoRepository.findAll();
+    promos.forEach((promo) => {
+        promo.img_url = `${process.env.BASE_URL}/${promo.img_url}`;
+      });
     if (!promos || promos.length === 0) {
       throw new Error("No promos found");
     }
