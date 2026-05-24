@@ -3,4 +3,6 @@ node_modules
 .env
 AGENTS.md
 dist
+docker-compose.yml
+Dockerfile
 /src/generated/prisma
